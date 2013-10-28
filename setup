@@ -1,0 +1,20 @@
+# -*-shell-script-*-
+. "$genapp_functions/core"
+
+_version=$(metadata meteor_version "0.6.6.2")
+
+cd $app_dir
+curl --output meteor.tar.gz --fail https://warehouse.meteor.com/bootstrap/${_version}/meteor-bootstrap-Linux_x86_64.tar.gz
+if [ $? != 0 ]
+then
+    echo "unsupported meteor version : $_version"
+    exit -1
+fi
+
+rm -rf .meteor
+tar xf meteor.tar.gz
+
+## FIXME need a way to set METEOR_WAREHOUSE_DIR = $app_dir/.meteor
+
+echo "set meteor bootstrap script as 'main.js'"
+ln -s $app_dir/.meteor/tools/latest/tools/meteor.js $app_dir/main.js
