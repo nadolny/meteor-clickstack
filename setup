@@ -14,7 +14,24 @@ fi
 rm -rf .meteor
 tar xf meteor.tar.gz
 
-## FIXME need a way to set METEOR_WAREHOUSE_DIR = $app_dir/.meteor
+# Install everything from pkg_dir
+mkdir $app_dir/app
+cp -a $pkg_dir/* $app_dir/app
 
-echo "set meteor bootstrap script as 'main.js'"
-ln -s $app_dir/.meteor/tools/latest/tools/meteor.js $app_dir/main.js
+# we want to export all config
+while read line ; do echo "export $line" >> $app_dir/.genapp/control/env_exports ; done < $app_dir/.genapp/control/env
+
+cat > "$control_dir/start" << EOF
+#!/bin/sh
+cd $app_dir/app
+export METEOR_WAREHOUSE_DIR=$app_dir/.meteor
+export PORT=$app_port
+. $app_dir/.genapp/control/env_exports
+
+exec $app_dir/.meteor/meteor
+EOF
+
+# start must be executable
+chmod 755 "$control_dir/start"
+
+
